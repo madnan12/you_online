@@ -1,0 +1,132 @@
+{% extends 'index.html'%} 
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <a href="{% url 'add_company'%}">Add Company</a>
+
+      <br>
+      
+          <form action="{% url 'search_company'%}" method="get">
+        <input type="text" name="query" id="query" placeholder="search...">
+        <button type="submit" class="btn btn-success btn-sm">Search</button>
+
+    </form>
+        <h2 class="alert alert-warning">Company Information</h2>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Sr. No</th>
+                <th scope="col">Company Owner</th>
+                <th scope="col">Com Name</th>
+                <th scope="col"> Email</th>
+                <th scope="col">Contact No.</th>
+                <th scope="col"> Address</th>
+                <th scope="col">Add job</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for c in com %} 
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td> {{c.user}}</td>
+                <td>{{c.name}} </td>
+                <td> {{c.email}}</td>
+                <td> {{c.mobile}} </td>
+                <td>  {{c.address}} </td>
+
+                {% if request.user == c.user %}
+
+                <td>  <small><a href="{% url 'add_job' c.pk %}"  type="button" class="btn btn-success btn-sm">add job</a></small></td>
+                <td><small> <a href="{% url 'update_company' c.id %}"  type="button" class="btn btn-secondary btn-sm">Update</a><a href="{% url 'delete_company' c.id %}"  type="button" class="btn btn-danger btn-sm">delete</a> </small></td>
+         
+                {% endif %}
+
+              </tr>
+               {% endfor %}
+            </tbody>
+          </table>
+
+        <br><br>
+
+        <form action="{% url 'search'%}" method="get">
+            <input type="text" name="title" id="title" placeholder="title of job">
+            <input type="text" name="country" id="country" placeholder="country">
+            <input type="text" name="state" id="state" placeholder="state">
+            <input type="text" name="city" id="city" placeholder="city">
+       
+            <input type="text" name="employeetype" id="employeetype" placeholder="employee type">
+            <!-- <input type="text" name="query5" id="query5" placeholder="education"> -->
+            <button type="submit" class="btn btn-success btn-sm">Search</button>
+
+        </form>
+
+        <h2 class="alert alert-warning">Job Information</h2>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Sr. No</th>
+                <th scope="col">Company</th>
+                <th scope="col">Posted by</th>
+                <th scope="col">Job Title</th>
+                <th scope="col">Experience</th>
+                <th scope="col"> Min salary</th>
+                <th scope="col">Max salary</th>
+                <th scope="col">Mobile</th>
+                <th scope="col">Language</th>
+                <th scope="col">Country</th>
+                <th scope="col">State</th>
+                <th scope="col">City</th>
+                <th scope="col">Job type</th>
+                <th scope="col">Currency</th>
+                <th scope="col">Education</th>
+                <th scope="col">Employee Type</th>
+                <th scope="col">Apply</th>
+                <th scope="col">Action</th>
+                <th scope="col">View Applied</th>
+              </tr>
+            </thead>
+         
+            <tbody>
+                {% for j in job %}  
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                
+                <td>{{j.company}}</td> 
+                <td>{{j.user}}</td> 
+                <td>{{j.title}}</td>
+                <td>{{j.experience}}</td>
+                 <td>{{j.minsalary}}</td> 
+                 <td>{{j.maxsalary}} </td>
+                 <td>{{j.mobile}} </td>
+                 <td>{{j.language}} </td>
+                 <td>{{j.country}} </td>
+                 <td>{{j.state}} </td>
+                 <td>{{j.city}} </td>
+                 <td>{{j.type}} </td>
+                 <td>{{j.currency}} </td>
+                 <td>{{j.education}} </td>
+                 <td>{{j.employeetype}} </td>
+                 
+                 <td><small><a href="{% url 'apply' j.id %}" type="button" class="btn btn-success btn-sm">apply</a></small> </td>
+                 {% if request.user == j.user %}
+                 <td><small> <a href="{% url 'update_job' j.id %}" type="button" class="btn btn-secondary btn-sm">Update</a></small><small><a href="{% url 'delete_job' j.id %}" type="button" class="btn btn-danger btn-sm">delete</a> </small></td>
+                 <td><small><a href="{% url 'all_applied' j.id %}" type="button" class="btn btn-warning btn-sm">view data</a></small> </td>
+                {% endif %}
+              </tr>
+               {% endfor %}
+            </tbody>
+          </table>
+
+        <br><br>
+
+  
+    </div>
+  </div>
+</div>
+
+{% endblock %}

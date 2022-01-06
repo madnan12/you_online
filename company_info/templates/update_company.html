@@ -1,0 +1,33 @@
+{% extends 'index.html'%} 
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+<h2 class="alert alert-warning">Update Company</h2>
+<form action="" method="post">
+    {% csrf_token %}
+
+Name
+    {{form.name}}
+    <br>
+Email
+    {{form.email}}
+    <br>
+Mobile
+    {{form.mobile}}
+    <br>
+Address
+    {{form.address}}
+    
+    <br><br>
+    <button type="submit" class="btn btn-success">Submit</button>
+
+</form>
+
+  
+    </div>
+  </div>
+</div>
+
+{% endblock %}

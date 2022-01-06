@@ -1,0 +1,46 @@
+{% extends 'index.html'%} 
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+
+        <h2 class="alert alert-success">All CV of Employee </h2>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Sr #</th>
+                <th scope="col">Employee name</th>
+                <th scope="col">CV</th>
+                <th scope="col">Experience</th>
+                <th scope="col">Expected</th>
+                <th scope="col">Job</th>
+              
+                
+                
+              </tr>
+            </thead>
+         
+            <tbody>
+                {% for a in apply %}
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                
+                <td>{{a.user}}</td> 
+                <td><a href="{{a.documents.url}}">{{a.user}} cv</a></td> 
+                <td>{{a.experience}}</td>
+                 <td>{{a.expected}}</td> 
+                 <td>{{a.job}}</td> 
+             
+              </tr>
+               {% endfor %}
+            </tbody>
+          </table>
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

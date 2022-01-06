@@ -1,0 +1,59 @@
+{% extends 'index.html'%} 
+{% block content %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+
+        <br><br>
+
+        <form action="{% url 'search_company'%}" method="get">
+            <input type="text" name="query" id="query" placeholder="search...">
+            <button type="submit" class="btn btn-success btn-sm">Search</button>
+
+        </form>
+        <h2 class="alert alert-warning">Search for comapny</h2>
+
+        <table class="table table-striped">
+            <thead>
+              <tr>
+                <th scope="col">Sr. No</th>
+                <th scope="col">Company Owner</th>
+                <th scope="col">Com Name</th>
+                <th scope="col"> Email</th>
+                <th scope="col">Contact No.</th>
+                <th scope="col"> Address</th>
+                <th scope="col">Add job</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+            {% for c in com %} 
+              <tr>
+                <th scope="row">{{forloop.counter}}</th>
+                <td> {{c.user}}</td>
+                <td>{{c.c_name}} </td>
+                <td> {{c.c_email}}</td>
+                <td> {{c.c_mobile}} </td>
+                <td>  {{c.c_address}} </td>
+
+                {% if request.user == c.user %}
+
+                <td>  <small><a href="{% url 'add_job' c.pk %}"  type="button" class="btn btn-success btn-sm">add job</a></small></td>
+                <td><small> <a href="{% url 'update_company' c.id %}"  type="button" class="btn btn-secondary btn-sm">Update</a><a href="{% url 'delete_company' c.id %}"  type="button" class="btn btn-danger btn-sm">delete</a> </small></td>
+         
+                {% endif %}
+
+              </tr>
+               {% endfor %}
+            </tbody>
+          </table>
+
+        <br><br>
+
+  
+    </div>
+  </div>
+</div>
+
+{% endblock %}
