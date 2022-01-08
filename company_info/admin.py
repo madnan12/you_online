@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Company, Job, Education, Currency,Country, Job_Experience, Job_Project,State,City, Language, Industry, Skill,FavouriteJob
+from django.contrib.admin.helpers import AdminField
+from .models import Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project,State,City, Language, Industry, Skill,FavouriteJob
 # Register your models here.
 
 @admin.register(Company)
@@ -53,3 +54,15 @@ class JobExperienceAdmin(admin.ModelAdmin):
 @admin.register(Job_Project)
 class JobProjectAdmin(admin.ModelAdmin):
     list_display=['name','start_date','end_date','accociated_with','project_url','description','is_deleted']
+
+@admin.register(Job_Profile)
+class JobProfileAdmin(admin.ModelAdmin):
+    list_display=['logo','headline','first_name','last_name','about']
+
+@admin.register(Job_Category)
+class Job_CategoryAdmin(admin.ModelAdmin):
+    list_display=['name']
+
+@admin.register(Job_Endoresements)
+class Job_EndoresementsAdmin(admin.ModelAdmin):
+    list_display=['profile1','profile2','skill','text']

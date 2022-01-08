@@ -8,6 +8,7 @@ urlpatterns = [
     path('get_favourite_api', views.get_favourite_api),
     path('get_job_experience_api', views.get_job_experience_api),
     path('get_job_project_api', views.get_job_project_api),
+    path('get_job_profile_api', views.get_job_profile_api),
 
     ########### CREATE API URL####################
     path('add_company',views.add_company ),
@@ -24,6 +25,8 @@ urlpatterns = [
     path('add_favourite_api',views.add_favourite_api ),
     path('add_job_experience_api',views.add_job_experience_api ),
     path('add_job_project_api',views.add_job_project_api ),
+    path('add_job_profile_api',views.add_job_profile_api ),
+    path('add_job_endoresements_api',views.add_job_endoresements_api ),
     ##################### DELETE API URL ######################
     path('delete_company_api',views.delete_company_api ),
     path('delete_job_api',views.delete_job_api ),
@@ -43,6 +46,7 @@ urlpatterns = [
     path('search_job_api/', views.search_job_api),
     path('update_job_experience_api', views.update_job_experience_api),
     path('update_job_project_api', views.update_job_project_api),
+    path('update_job_profile_api', views.update_job_profile_api),
     ######################## VIEWS URL #########################
     path('company_info', views.company, name='company_info'),
     path('search', views.search_job, name='search'),

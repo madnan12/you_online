@@ -87,7 +87,14 @@ class Education(models.Model):
     def __str__(self):
         return self.name
 
-
+class Job_Category(models.Model):
+    name=models.CharField(max_length=255)
+    
+    class Meta:
+        db_table='Job_Category'
+    
+    def __str__(self):
+        return self.name
 
 # industry model
 class Industry(models.Model):
@@ -122,7 +129,6 @@ class Job(models.Model):
  
     ]
 
-
     job_choices=[
         ('Web developer', 'Web developer'),
         ('Web designer', 'Web designer'),
@@ -140,9 +146,8 @@ class Job(models.Model):
         ('7 days', '7 days'),
         ('14 days', '14 days'),
         ('30 days', '30 days'),
-      
     ]
-
+    
     company=models.ForeignKey(Company, on_delete=models.CASCADE, related_name='job_company')
     user=models.ForeignKey(User, on_delete=models.CASCADE,  related_name='job_user')
     title=models.CharField(max_length=255, null=True, blank=True)
@@ -164,6 +169,7 @@ class Job(models.Model):
     duration=models.CharField(max_length=255, choices=duration_choices ,null=True, blank=True)
     skill=models.ForeignKey(Skill ,null=True, blank=True, on_delete=models.SET_NULL, related_name='job_skill')
     is_deleted=models.BooleanField(default=False)
+    category=models.ForeignKey(Job_Category, on_delete=models.SET_NULL, null=True, blank=True)
     class Meta:
         db_table='Job'
     
@@ -171,6 +177,7 @@ class Job(models.Model):
     def __str__(self):
         return self.title
 
+# job apply model
 class Apply(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     job=models.ForeignKey(Job, on_delete=models.CASCADE)
@@ -183,6 +190,7 @@ class Apply(models.Model):
     def __str__(self):
         return str(self.experience)+" "+str(self.expected) 
 
+# favourite job model
 class FavouriteJob(models.Model):
     job=models.ForeignKey(Job, on_delete=models.CASCADE)
     user=models.ForeignKey(User, on_delete=models.CASCADE)
@@ -193,6 +201,7 @@ class FavouriteJob(models.Model):
     def __str__(self):
         return str(self.job.title)
 
+# job experience model
 class Job_Experience(models.Model):
     employee_choices=[
         ('Full Time','Full Time'),
@@ -208,8 +217,8 @@ class Job_Experience(models.Model):
     empoyeetype=models.CharField(max_length=255, choices=employee_choices)
     companyname=models.CharField(max_length=255)
     location=models.CharField(max_length=255)
-    start_date=models.DateTimeField(auto_now_add=True)
-    end_date=models.DateTimeField(auto_now_add=True)
+    start_date=models.DateField()
+    end_date=models.DateField()
     headline=models.CharField(max_length=255)
     industry=models.ForeignKey(Industry,  on_delete=models.SET_NULL, null=True, blank=True)
     description=models.TextField(null=True, blank=True)
@@ -220,10 +229,11 @@ class Job_Experience(models.Model):
     def __str__(self):
         return self.headline
 
+# job project model
 class Job_Project(models.Model):
     name=models.CharField(max_length=255)
-    start_date=models.DateTimeField(auto_now_add=True)
-    end_date=models.DateTimeField(auto_now_add=True)
+    start_date=models.DateField()
+    end_date=models.DateField()
     accociated_with=models.ForeignKey(Job_Experience, on_delete=models.SET_NULL, null=True, blank=True)
     project_url=models.CharField(max_length=255)
     description=models.TextField(null=True, blank=True)
@@ -234,3 +244,29 @@ class Job_Project(models.Model):
     def __str__(self):
         return (self.name)
 
+# job profile model
+class Job_Profile(models.Model):
+    logo=models.ImageField(upload_to='jobprofile_logo')
+    headline=models.CharField(max_length=35)
+    first_name=models.CharField(max_length=255)
+    last_name=models.CharField(max_length=255)
+    about=models.TextField(null=True, blank=True)
+    
+    class Meta:
+        db_table='Job_Profile'
+    
+    def __str__(self):
+        return self.first_name +self.last_name
+    
+# job endoresements model
+class Job_Endoresements(models.Model):
+    profile1=models.ForeignKey(Job_Profile, on_delete=models.CASCADE)
+    profile2=models.ForeignKey(User, on_delete=models.CASCADE)
+    skill=models.ForeignKey(Skill, on_delete=models.CASCADE)
+    text=models.TextField()
+
+    class Meta:
+        db_table='Job_Endoresements'
+
+    def __str__(self):
+        return self.text

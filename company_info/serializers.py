@@ -1,9 +1,6 @@
 from django.contrib.postgres import fields
 from rest_framework import serializers
-from .models import Apply, Company, FavouriteJob, Job, Education, Currency,Country,State,City, Language, Industry, Skill,Job_Experience,Job_Project
-from rest_framework.fields import ListField
-
-from company_info import models
+from .models import Apply, Company, FavouriteJob, Job, Education, Currency,Country, Job_Profile,State,City, Language, Industry, Skill,Job_Experience,Job_Project, Job_Endoresements
 
 # company serializer
 class CompanySerializer(serializers.ModelSerializer):
@@ -86,7 +83,16 @@ class JobProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model=Job_Project
         fields='__all__'
-        # fields=['name','accociated_with','project_url','description']
+
+class Job_ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Job_Profile
+        fields='__all__'
+
+class Job_EndoresementsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Job_Endoresements
+        fields='__all__'
 
 #####################################  UPDATE SERIALIZERS   ##################################
 
@@ -135,3 +141,8 @@ class GetJobProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model=Job_Project
         fields=['name','start_date','end_date','accociated_with','project_url','description']
+
+class GetJob_ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Job_Profile
+        fields="__all__"

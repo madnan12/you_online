@@ -4,8 +4,8 @@ from django.shortcuts import redirect, render
 from rest_framework import status
 from django.shortcuts import  get_object_or_404
 from rest_framework.response import Response
-from .serializers import ApplySerializer, CompanySerializer, FavouriteSerializer, GetFavouriteSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, UpdateCompanySerializer, UpdateJobSerializer
-from .models import City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Experience, Job_Project, Language, Skill, State
+from .serializers import ApplySerializer, CompanySerializer, FavouriteSerializer, GetFavouriteSerializer, GetJob_ProfileSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, Job_EndoresementsSerializer, Job_ProfileSerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, UpdateCompanySerializer, UpdateJobSerializer
+from .models import City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Experience, Job_Profile, Job_Project, Language, Skill, State
 from django.db.models import Max, Min, manager
 from django.db.models import Q
 from .forms import Company_InfoForm, Job_InfoForm, Company_InfoUpdateForm, Job_InfoUpdateForm, ApplyForm
@@ -54,6 +54,12 @@ def get_job_project_api(request):
     project=Job_Project.objects.filter(is_deleted=False)
     serializer=GetJobProjectSerializer(project, many=True)
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+
+@api_view(['GET'])
+def get_job_profile_api(request):
+    profile=Job_Profile.objects.filter(is_deleted=False)
+    serializer=GetJob_ProfileSerializer(profile, many=True)
+    return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
 
 
 ############################### CREATE API ###########################################
@@ -170,7 +176,7 @@ def add_apply_api(request):
     return Response({"success": False, 'response': {'message': serializer.errors}},
 			status=status.HTTP_400_BAD_REQUEST)
 
-
+# add favourite job api
 @api_view(['POST',])
 def add_favourite_api(request):
     job_id=request.data.get('job')
@@ -207,6 +213,27 @@ def add_job_project_api(request):
         return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
     return Response({"success": False, 'response': {'message': serializer.errors}},
 			status=status.HTTP_400_BAD_REQUEST)
+
+# add job profile api
+@api_view(['POST'])
+def add_job_profile_api(request):
+    serializer=Job_ProfileSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+    return Response({"success": False, 'response': {'message': serializer.errors}},
+			status=status.HTTP_400_BAD_REQUEST)
+
+# add job endoresements api
+@api_view(['POST'])
+def add_job_endoresements_api(request):
+    serializer=Job_EndoresementsSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+    return Response({"success": False, 'response': {'message': serializer.errors}},
+			status=status.HTTP_400_BAD_REQUEST)
+
 
 
 ########################## DELETE API  ###############################
@@ -390,6 +417,22 @@ def update_job_project_api(request):
         return Response({"success": False, 'response': {'message': serializer.errors}},
 			status=status.HTTP_400_BAD_REQUEST)
 
+# update job profile api
+@api_view(['PUT'])
+def update_job_profile_api(request):
+    id=request.query_params.get('id')
+    try:
+        profile=Job_Profile.objects.get(id=id)
+    except Job_Profile.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='PUT':
+        serializer=Job_ProfileSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()    
+            return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+        return Response({"success": False, 'response': {'message': serializer.errors}},
+			status=status.HTTP_400_BAD_REQUEST)
+
 
 ##############################  FILTERING IN API  ########################
 
@@ -418,6 +461,10 @@ def search_job_api(request):
     education=request.query_params.get('education')
     if not education:
         education=''
+    category=request.query_params.get('category')
+    if not category:
+        category=''
+
     if minsalary and not maxsalary:
             job=Job.objects.filter(Q(title__icontains=title)&
                         Q(minsalary__gte=minsalary)& 
@@ -426,7 +473,8 @@ def search_job_api(request):
                         Q(city__name__icontains=city)& 
                         Q(employeetype__icontains=employeetype)&
                         Q(skill__name__icontains=skill)&
-                        Q(education__name__icontains=education)
+                        Q(education__name__icontains=education)&
+                        Q(category__name__icontains=category)
                         )
         
     if maxsalary and not minsalary:
@@ -437,7 +485,8 @@ def search_job_api(request):
                         Q(city__name__icontains=city)& 
                         Q(employeetype__icontains=employeetype)&
                         Q(skill__name__icontains=skill)&
-                        Q(education__name__icontains=education)
+                        Q(education__name__icontains=education)&
+                        Q(category__name__icontains=category)
                         )
     if minsalary and maxsalary:
                     job=Job.objects.filter(Q(title__icontains=title)&
@@ -448,7 +497,9 @@ def search_job_api(request):
                         Q(city__name__icontains=city)& 
                         Q(employeetype__icontains=employeetype)&
                         Q(skill__name__icontains=skill)&
-                        Q(education__name__icontains=education)
+                        Q(education__name__icontains=education)&
+                        Q(category__name__icontains=category)
+
                         )
     if not minsalary and not maxsalary:
                     job=Job.objects.filter(Q(title__icontains=title)&
@@ -457,8 +508,10 @@ def search_job_api(request):
                         Q(city__name__icontains=city)& 
                         Q(employeetype__icontains=employeetype)&
                         Q(skill__name__icontains=skill)&
-                        Q(education__name__icontains=education)
-                        )
+                        Q(education__name__icontains=education)&
+                        Q(category__name__icontains=category)
+
+                    )
 
     serializer=GetJobSerializer(job, many=True)
     return Response(serializer.data)
