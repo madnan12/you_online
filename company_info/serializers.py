@@ -3,7 +3,7 @@ from django.contrib.postgres import fields
 from django.db import models
 from django.http import request
 from rest_framework import serializers
-from .models import AdminBlog, AdminJob, Apply, Blog, Company, FavouriteJob, Job, Education, Currency,Country, Job_Profile,State,City, Language, Industry, Skill,Job_Experience,Job_Project, Job_Endoresements
+from .models import AdminBlog, AdminJob, Apply, Blog, Company, FavouriteJob, Job, Education, Currency,Country, Job_Profile, Post,State,City, Language, Industry, Skill,Job_Experience,Job_Project, Job_Endoresements
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -110,11 +110,18 @@ class Job_EndoresementsSerializer(serializers.ModelSerializer):
         model=Job_Endoresements
         fields='__all__'
 
+# Post serializer
+class PostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Post
+        fields=['content','normal_post','blog_post']
+
 # blog serializer
 class BlogSerializer(serializers.ModelSerializer):
+    post=PostSerializer(read_only=True)
     class Meta:
         model=Blog
-        fields=['title','category','description','body']
+        fields=['title','category','description','body','post']
 
 # admin jobs serializer
 class AdminJobSerializer(serializers.ModelSerializer):
@@ -248,7 +255,8 @@ class GetJob_ProfileSerializer(serializers.ModelSerializer):
 # get blog serializer
 class GetBlogSerializer(serializers.ModelSerializer):
     user=UserSerializer(read_only=True)
+    post=PostSerializer(read_only=True)
     category=serializers.StringRelatedField()
     class Meta:
         model=Blog
-        fields=['user','category','title','description','body','created_at']
+        fields=['user','category','title','description','body','created_at','post']

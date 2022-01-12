@@ -1,21 +1,21 @@
-from os import name
 from rest_framework.decorators import api_view
 import datetime
 from django.shortcuts import redirect, render
-from rest_framework import serializers, status
-from django.shortcuts import  get_object_or_404
+from rest_framework import status
 from rest_framework.response import Response
-from .serializers import AdminJobSerializer, ApplySerializer, BlogSerializer, CompanySerializer, FavouriteSerializer, GetApplySerializer, GetBlogSerializer, GetFavouriteSerializer, GetJob_EndoresementsSerializer, GetJob_ProfileSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, Job_EndoresementsSerializer, Job_ProfileSerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, UpdateCompanySerializer, UpdateJobSerializer, AdminBlogSerializer
-from .models import AdminBlog, AdminJob, Blog, City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Language, Skill, State, Blog_Category
+from .serializers import AdminJobSerializer, ApplySerializer, BlogSerializer, CompanySerializer, FavouriteSerializer, GetApplySerializer, GetBlogSerializer, GetFavouriteSerializer, GetJob_EndoresementsSerializer, GetJob_ProfileSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, Job_EndoresementsSerializer, Job_ProfileSerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, PostSerializer,UpdateCompanySerializer, UpdateJobSerializer, AdminBlogSerializer
+from .models import AdminBlog, AdminJob, Blog, City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Language, Post, Skill, State, Blog_Category
 from django.db.models import Q
 from .forms import Company_InfoForm, Job_InfoForm, Company_InfoUpdateForm, Job_InfoUpdateForm, ApplyForm
+from company_info import serializers
 
 ###############################  FETCHING API ########################################
 
+# get all latest job within 24 hours
 @api_view(['GET'])
 def get_jobs_api(request):
     date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-    jobs=Job.objects.filter(created_at__gte=date_from ,is_deleted=False)
+    jobs=Job.objects.filter(created_at__gte=date_from ,is_deleted=False).order_by('-created_at')
     serializer=GetJobSerializer(jobs, many=True)
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
 
@@ -70,7 +70,7 @@ def get_job_endoresements_api(request):
 @api_view(['GET'])
 def get_blog_api(request):
     date_from = datetime.datetime.now() - datetime.timedelta(days=1)
-    blogs=Blog.objects.filter(created_at__gte=date_from ,is_deleted=False)
+    blogs=Blog.objects.filter(created_at__gte=date_from ,is_deleted=False).order_by('-created_at')
     serializer=GetBlogSerializer(blogs, many=True)
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
 
@@ -81,8 +81,8 @@ def get_apply_api(request):
     serializer=GetApplySerializer(blogs, many=True)
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
 
-
 ############################### CREATE API ###########################################
+
 # add company api
 @api_view(['POST'])
 def add_company(request):
@@ -257,18 +257,17 @@ def add_job_endoresements_api(request):
 # add blog api
 @api_view(['POST'])
 def add_blog_api(request):
-    serializer=BlogSerializer(data=request.data)
-    if serializer.is_valid():
-        category_id=request.data['category']
-        category= Blog_Category.objects.get(id=category_id)
-        user=request.user
-        title=request.data['title']
-        description=request.data['description']
-        body=request.data['body']
-        blogs=Blog.objects.create(category=category,user=user ,title=title, description=description, body=body)
-        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
-    return Response({"success": False, 'response': {'message': serializer.errors}},
-                status=status.HTTP_400_BAD_REQUEST)
+    content=request.data['content']
+    post=Post.objects.create(content=content, normal_post=False, blog_post=True)
+    category_id=request.data['category']
+    category= Blog_Category.objects.get(id=category_id)
+    user=request.user
+    title=request.data['title']
+    description=request.data['description']
+    body=request.data['body']
+    blog=Blog.objects.create(category=category,user=user ,title=title, description=description, body=body, post=post)
+    serializer = BlogSerializer(blog)
+    return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
 
 
 

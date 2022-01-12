@@ -1,7 +1,11 @@
 from django.contrib import admin
 from django.contrib.admin.helpers import AdminField
-from .models import AdminBlog, AdminJob, Blog, Blog_Category, Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project,State,City, Language, Industry, Skill,FavouriteJob
+from .models import AdminBlog, AdminJob, Blog, Blog_Category, Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Post,State,City, Language, Industry, Skill,FavouriteJob
 # Register your models here.
+
+@admin.register(Post)
+class PostAdmin(admin.ModelAdmin):
+    list_display=['content','normal_post','blog_post']
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
@@ -21,7 +25,7 @@ class CurrencyAdmin(admin.ModelAdmin):
 
 @admin.register(Country)
 class CountryAdmin(admin.ModelAdmin):
-    list_display=['name','code']
+    list_display=['counter','name','code']
 
 @admin.register(State)
 class StateAdmin(admin.ModelAdmin):
@@ -69,7 +73,7 @@ class Job_EndoresementsAdmin(admin.ModelAdmin):
 
 @admin.register(Blog)
 class BlogAdmin(admin.ModelAdmin):
-    list_display=['user','category','title','description','body','created_at','is_deleted']
+    list_display=['user','category','title','description','body','created_at','post','is_deleted']
 
 @admin.register(Blog_Category)
 class Blog_CategoryAdmin(admin.ModelAdmin):

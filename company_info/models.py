@@ -1,8 +1,11 @@
+import sys
 from django.db import models
 from django.contrib.auth.models import User
-from django.db.models.aggregates import Max
-
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
 # Create your models here.
+    
 # company model
 class Company(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
@@ -11,7 +14,7 @@ class Company(models.Model):
     mobile=models.CharField(max_length=25)
     address=models.TextField()
     description=models.TextField()
-    logo=models.ImageField(upload_to='company_logo')
+    logo=models.ImageField(upload_to='company/logo')
     is_deleted=models.BooleanField(default=False)
     class Meta:
         db_table='Company'
@@ -19,13 +22,29 @@ class Company(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        if self.logo:
+            self.logo = self.compressImage(self.logo)
+        super(Company, self).save(*args, **kwargs)
+
+    def compressImage(self, logo):
+        imageTemproary = Image.open(logo)
+        imageTemproary = imageTemproary.convert('RGB')
+        outputIoStream = BytesIO()
+        imageTemproary.save(outputIoStream, format='jpeg', quality=30)
+        outputIoStream.seek(0)
+        company_logo = InMemoryUploadedFile(outputIoStream, 'ImageField', "%s.jpg" % logo.name.split('.')[0], 'logo/jpeg', sys.getsizeof(outputIoStream), None)
+        return company_logo
+
 # country model
 class Country(models.Model):
+    counter=models.IntegerField()
     name = models.CharField(max_length=40)
     code=models.CharField(max_length=255)
     is_deleted=models.BooleanField(default=False)
     class Meta:
         db_table='Country'
+        ordering=['counter',]
 
     def __str__(self):
         return self.code
@@ -172,6 +191,7 @@ class Job(models.Model):
     created_at=models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table='Job'
+        ordering=['-created_at',]
     
 
     def __str__(self):
@@ -181,7 +201,7 @@ class Job(models.Model):
 class Apply(models.Model):
     user=models.ForeignKey(User, on_delete=models.CASCADE)
     job=models.ForeignKey(Job, on_delete=models.CASCADE)
-    documents=models.FileField(upload_to='doc/')
+    documents=models.FileField(upload_to='apply/cv')
     experience=models.IntegerField()
     expected=models.IntegerField()
     class Meta:
@@ -245,10 +265,11 @@ class Job_Project(models.Model):
     def __str__(self):
         return (self.name)
 
+ 
 # job profile model
 class Job_Profile(models.Model):
     user=models.OneToOneField(User, on_delete=models.CASCADE)
-    logo=models.ImageField(upload_to='jobprofile_logo')
+    logo=models.ImageField(upload_to='jobprofile/logo')
     headline=models.CharField(max_length=35)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
@@ -260,7 +281,21 @@ class Job_Profile(models.Model):
     
     def __str__(self):
         return self.first_name +self.last_name
-    
+       
+    def save(self, *args, **kwargs):
+        if self.logo:
+            self.logo = self.compressImage(self.logo)
+        super(Job_Profile, self).save(*args, **kwargs)
+
+    def compressImage(self, logo):
+        imageTemproary = Image.open(logo)
+        imageTemproary = imageTemproary.convert('RGB')
+        outputIoStream = BytesIO()
+        imageTemproary.save(outputIoStream, format='jpeg', quality=30)
+        outputIoStream.seek(0)
+        profile_logo = InMemoryUploadedFile(outputIoStream, 'ImageField', "%s.jpg" % logo.name.split('.')[0], 'logo/jpeg', sys.getsizeof(outputIoStream), None)
+        return profile_logo
+
 # job endoresements model
 class Job_Endoresements(models.Model):
     profile1=models.ForeignKey(Job_Profile, on_delete=models.CASCADE)
@@ -284,6 +319,17 @@ class Blog_Category(models.Model):
     def __str__(self):
         return self.name
 
+# post model
+class Post(models.Model):
+    content=models.CharField(max_length=255)
+    normal_post=models.BooleanField(default=False)
+    blog_post=models.BooleanField(default=False)
+    class Meta:
+        db_table='Post'
+    
+    def __str__(self):
+        return self.content
+
 # blog model
 class Blog(models.Model):
     category=models.ForeignKey(Blog_Category, on_delete=models.SET_NULL, null=True, blank=True)
@@ -292,6 +338,7 @@ class Blog(models.Model):
     description=models.CharField(max_length=255, null=True, blank=True)
     body=models.TextField(null=True, blank=True)
     created_at=models.DateTimeField(auto_now_add=True)
+    post=models.ForeignKey(Post, on_delete=models.SET_NULL, null=True, blank=True)
     is_deleted=models.BooleanField(default=False)
 
     class Meta:
