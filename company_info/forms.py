@@ -137,13 +137,10 @@ class Job_InfoForm(forms.ModelForm):
         ('Fresh', 'Fresh'),
         ('Intermediate', 'Intermediate'),
         ('Senior', 'Senior'),
-      
+
     ]
     experience=forms.ChoiceField(choices=experience_choices)
-    # language=forms.ChoiceField(choices=language_choices)
     type=forms.ChoiceField(choices=job_choices)
-    # currency=forms.ChoiceField(choices=currency_choices)
-    # education=forms.ChoiceField(choices=education_choices)
     employeetype=forms.ChoiceField(choices=employee_choices)
     class Meta:
         model=Job

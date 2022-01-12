@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin.helpers import AdminField
-from .models import Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project,State,City, Language, Industry, Skill,FavouriteJob
+from .models import AdminBlog, AdminJob, Blog, Blog_Category, Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project,State,City, Language, Industry, Skill,FavouriteJob
 # Register your models here.
 
 @admin.register(Company)
@@ -9,7 +9,7 @@ class CompanyAdmin(admin.ModelAdmin):
     
 @admin.register(Job)
 class JobAdmin(admin.ModelAdmin):
-    list_display=['company', 'user','title','experience','minsalary','maxsalary', 'mobile', 'language','country','state','city','location','type','currency','education','industry','employeetype','duration','skill','is_deleted']
+    list_display=['company', 'user','title','experience','minsalary','maxsalary', 'mobile', 'language','country','state','city','location','type','currency','education','industry','employeetype','duration','skill','is_deleted','created_at']
 
 @admin.register(Education)
 class EducationAdmin(admin.ModelAdmin):
@@ -57,7 +57,7 @@ class JobProjectAdmin(admin.ModelAdmin):
 
 @admin.register(Job_Profile)
 class JobProfileAdmin(admin.ModelAdmin):
-    list_display=['logo','headline','first_name','last_name','about']
+    list_display=['headline','first_name','last_name','logo','about']
 
 @admin.register(Job_Category)
 class Job_CategoryAdmin(admin.ModelAdmin):
@@ -66,3 +66,19 @@ class Job_CategoryAdmin(admin.ModelAdmin):
 @admin.register(Job_Endoresements)
 class Job_EndoresementsAdmin(admin.ModelAdmin):
     list_display=['profile1','profile2','skill','text']
+
+@admin.register(Blog)
+class BlogAdmin(admin.ModelAdmin):
+    list_display=['user','category','title','description','body','created_at','is_deleted']
+
+@admin.register(Blog_Category)
+class Blog_CategoryAdmin(admin.ModelAdmin):
+    list_display=['name']
+
+@admin.register(AdminJob)
+class AdminJobAdmin(admin.ModelAdmin):
+    list_display=['job','user','created_at']
+
+@admin.register(AdminBlog)
+class AdminBlogAdmin(admin.ModelAdmin):
+    list_display=['blog','user','created_at']

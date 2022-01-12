@@ -9,6 +9,10 @@ urlpatterns = [
     path('get_job_experience_api', views.get_job_experience_api),
     path('get_job_project_api', views.get_job_project_api),
     path('get_job_profile_api', views.get_job_profile_api),
+    path('get_job_endoresements_api', views.get_job_endoresements_api),
+    path('get_blog_api', views.get_blog_api),
+    path('get_apply_api', views.get_apply_api),
+    path('search_blog_api', views.search_blog_api),
 
     ########### CREATE API URL####################
     path('add_company',views.add_company ),
@@ -27,7 +31,11 @@ urlpatterns = [
     path('add_job_project_api',views.add_job_project_api ),
     path('add_job_profile_api',views.add_job_profile_api ),
     path('add_job_endoresements_api',views.add_job_endoresements_api ),
-    ##################### DELETE API URL ######################
+    path('add_blog_api',views.add_blog_api ),
+    path('add_admin_jobs_api',views.add_admin_jobs_api ),
+    path('add_admin_blogs_api',views.add_admin_blogs_api ),
+
+    ##################### DELETE API URL #####################
     path('delete_company_api',views.delete_company_api ),
     path('delete_job_api',views.delete_job_api ),
     path('delete_skill_api',views.delete_skill_api ),
@@ -40,13 +48,17 @@ urlpatterns = [
     path('delete_favourite_api',views.delete_favourite_api ),
     path('delete_job_experience_api',views.delete_job_experience_api ),
     path('delete_job_project_api',views.delete_job_project_api ),
-    ##################### UPDATE API URL ##########################
+    path('delete_blog_api',views.delete_blog_api ),
+
+    ##################### UPDATE API URL #######################
     path('update_company_api', views.update_company_api),
     path('update_job_api', views.update_job_api),
     path('search_job_api/', views.search_job_api),
     path('update_job_experience_api', views.update_job_experience_api),
     path('update_job_project_api', views.update_job_project_api),
     path('update_job_profile_api', views.update_job_profile_api),
+    path('update_blog_api', views.update_blog_api),
+    
     ######################## VIEWS URL #########################
     path('company_info', views.company, name='company_info'),
     path('search', views.search_job, name='search'),

@@ -1,7 +1,6 @@
-from typing import Tuple
 from django.db import models
 from django.contrib.auth.models import User
-from django.contrib.postgres.fields import ArrayField
+from django.db.models.aggregates import Max
 
 # Create your models here.
 # company model
@@ -170,6 +169,7 @@ class Job(models.Model):
     skill=models.ForeignKey(Skill ,null=True, blank=True, on_delete=models.SET_NULL, related_name='job_skill')
     is_deleted=models.BooleanField(default=False)
     category=models.ForeignKey(Job_Category, on_delete=models.SET_NULL, null=True, blank=True)
+    created_at=models.DateTimeField(auto_now_add=True)
     class Meta:
         db_table='Job'
     
@@ -212,7 +212,7 @@ class Job_Experience(models.Model):
         ('Apprenticehip','Apprenticehip'),
         ('Seasonal','Seasonal'),
     ]
-
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
     title=models.CharField(max_length=255)
     empoyeetype=models.CharField(max_length=255, choices=employee_choices)
     companyname=models.CharField(max_length=255)
@@ -231,6 +231,7 @@ class Job_Experience(models.Model):
 
 # job project model
 class Job_Project(models.Model):
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
     name=models.CharField(max_length=255)
     start_date=models.DateField()
     end_date=models.DateField()
@@ -246,11 +247,13 @@ class Job_Project(models.Model):
 
 # job profile model
 class Job_Profile(models.Model):
+    user=models.OneToOneField(User, on_delete=models.CASCADE)
     logo=models.ImageField(upload_to='jobprofile_logo')
     headline=models.CharField(max_length=35)
     first_name=models.CharField(max_length=255)
     last_name=models.CharField(max_length=255)
     about=models.TextField(null=True, blank=True)
+    is_deleted=models.BooleanField(default=False)
     
     class Meta:
         db_table='Job_Profile'
@@ -264,9 +267,62 @@ class Job_Endoresements(models.Model):
     profile2=models.ForeignKey(User, on_delete=models.CASCADE)
     skill=models.ForeignKey(Skill, on_delete=models.CASCADE)
     text=models.TextField()
+    is_deleted=models.BooleanField(default=False)
 
     class Meta:
         db_table='Job_Endoresements'
 
     def __str__(self):
         return self.text
+
+class Blog_Category(models.Model):
+    name=models.CharField(max_length=255)
+
+    class Meta:
+        db_table='Blog_Category'
+
+    def __str__(self):
+        return self.name
+
+# blog model
+class Blog(models.Model):
+    category=models.ForeignKey(Blog_Category, on_delete=models.SET_NULL, null=True, blank=True)
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    title=models.CharField(max_length=255)
+    description=models.CharField(max_length=255, null=True, blank=True)
+    body=models.TextField(null=True, blank=True)
+    created_at=models.DateTimeField(auto_now_add=True)
+    is_deleted=models.BooleanField(default=False)
+
+    class Meta:
+        db_table='Blog'
+        ordering=['-created_at',]
+
+    def __str__(self):
+        return self.title
+
+
+# Admin jobs model
+class AdminJob(models.Model):
+    job=models.ForeignKey(Job, on_delete=models.CASCADE)
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='AdminJobs'
+    
+    def __str__(self):
+        return str(self.job.title)
+
+# Admin Blogs model
+class AdminBlog(models.Model):
+    blog=models.ForeignKey(Blog, on_delete=models.CASCADE)
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at=models.DateTimeField(auto_now_add=True)
+    class Meta:
+        db_table='AdminBlogs'
+    
+    def __str__(self):
+        return str(self.blog.title)
+
+
+    

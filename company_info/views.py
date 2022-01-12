@@ -1,22 +1,21 @@
-from django.db.models.query import RawQuerySet
+from os import name
 from rest_framework.decorators import api_view
+import datetime
 from django.shortcuts import redirect, render
-from rest_framework import status
+from rest_framework import serializers, status
 from django.shortcuts import  get_object_or_404
 from rest_framework.response import Response
-from .serializers import ApplySerializer, CompanySerializer, FavouriteSerializer, GetFavouriteSerializer, GetJob_ProfileSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, Job_EndoresementsSerializer, Job_ProfileSerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, UpdateCompanySerializer, UpdateJobSerializer
-from .models import City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Experience, Job_Profile, Job_Project, Language, Skill, State
-from django.db.models import Max, Min, manager
+from .serializers import AdminJobSerializer, ApplySerializer, BlogSerializer, CompanySerializer, FavouriteSerializer, GetApplySerializer, GetBlogSerializer, GetFavouriteSerializer, GetJob_EndoresementsSerializer, GetJob_ProfileSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, Job_EndoresementsSerializer, Job_ProfileSerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, UpdateCompanySerializer, UpdateJobSerializer, AdminBlogSerializer
+from .models import AdminBlog, AdminJob, Blog, City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Language, Skill, State, Blog_Category
 from django.db.models import Q
 from .forms import Company_InfoForm, Job_InfoForm, Company_InfoUpdateForm, Job_InfoUpdateForm, ApplyForm
-from django.views.decorators.csrf import csrf_exempt
 
-from company_info import serializers
 ###############################  FETCHING API ########################################
 
 @api_view(['GET'])
 def get_jobs_api(request):
-    jobs=Job.objects.filter(is_deleted=False)
+    date_from = datetime.datetime.now() - datetime.timedelta(days=1)
+    jobs=Job.objects.filter(created_at__gte=date_from ,is_deleted=False)
     serializer=GetJobSerializer(jobs, many=True)
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
 
@@ -57,8 +56,29 @@ def get_job_project_api(request):
 
 @api_view(['GET'])
 def get_job_profile_api(request):
+    user=request.user
     profile=Job_Profile.objects.filter(is_deleted=False)
-    serializer=GetJob_ProfileSerializer(profile, many=True)
+    serializer=GetJob_ProfileSerializer(profile, many=True, context={'user':user})
+    return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
+
+@api_view(['GET'])
+def get_job_endoresements_api(request):
+    endoresements=Job_Endoresements.objects.all()
+    serializer=GetJob_EndoresementsSerializer(endoresements, many=True)
+    return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
+
+@api_view(['GET'])
+def get_blog_api(request):
+    date_from = datetime.datetime.now() - datetime.timedelta(days=1)
+    blogs=Blog.objects.filter(created_at__gte=date_from ,is_deleted=False)
+    serializer=GetBlogSerializer(blogs, many=True)
+    return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
+
+@api_view(['GET'])
+def get_apply_api(request):
+    user=request.user
+    blogs=Apply.objects.filter(user=user)
+    serializer=GetApplySerializer(blogs, many=True)
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
 
 
@@ -182,7 +202,6 @@ def add_favourite_api(request):
     job_id=request.data.get('job')
     try:
         job=Job.objects.get(id=job_id)
-        print("adnan")
     except Job.DoesNotExist:
         pass
     try:
@@ -227,6 +246,7 @@ def add_job_profile_api(request):
 # add job endoresements api
 @api_view(['POST'])
 def add_job_endoresements_api(request):
+    profile2=request.user
     serializer=Job_EndoresementsSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
@@ -234,7 +254,55 @@ def add_job_endoresements_api(request):
     return Response({"success": False, 'response': {'message': serializer.errors}},
 			status=status.HTTP_400_BAD_REQUEST)
 
+# add blog api
+@api_view(['POST'])
+def add_blog_api(request):
+    serializer=BlogSerializer(data=request.data)
+    if serializer.is_valid():
+        category_id=request.data['category']
+        category= Blog_Category.objects.get(id=category_id)
+        user=request.user
+        title=request.data['title']
+        description=request.data['description']
+        body=request.data['body']
+        blogs=Blog.objects.create(category=category,user=user ,title=title, description=description, body=body)
+        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+    return Response({"success": False, 'response': {'message': serializer.errors}},
+                status=status.HTTP_400_BAD_REQUEST)
 
+
+
+# add admin jobs job api
+@api_view(['POST',])
+def add_admin_jobs_api(request):
+    job_id=request.data.get('job')
+    try:
+        job=Job.objects.get(id=job_id, is_deleted=False)
+    except Job.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    try:
+        adminjob=AdminJob.objects.get(user=request.user, job=job)
+        return Response({"success": 'you already added this job!'} ,status=status.HTTP_200_OK)
+    except AdminJob.DoesNotExist:
+        adminjob=AdminJob.objects.create(user=request.user, job=job)
+        serializer=AdminJobSerializer(adminjob)
+        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+
+# add admin jobs job api
+@api_view(['POST',])
+def add_admin_blogs_api(request):
+    blog_id=request.data.get('blog')
+    try:
+        blog=Blog.objects.get(id=blog_id, is_deleted=False)
+    except Blog.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    try:
+        adminblog=AdminBlog.objects.get(user=request.user, blog=blog)
+        return Response({"success": 'you already added this blog!'} ,status=status.HTTP_200_OK)
+    except AdminBlog.DoesNotExist:
+        adminblog=AdminBlog.objects.create(user=request.user, blog=blog)
+        serializer=AdminBlogSerializer(adminblog)
+        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
 
 ########################## DELETE API  ###############################
 
@@ -301,7 +369,7 @@ def delete_industry_api(request):
     industry.save()
     return Response('industry deleted')
 
-# country api
+# delete country api
 @api_view(['DELETE'])
 def delete_country_api(request):
     id=request.query_params.get('id')
@@ -328,6 +396,7 @@ def delete_city_api(request):
     city.save()
     return Response('city deleted')
 
+# delete favourite api
 @api_view(['DELETE'])
 def delete_favourite_api(request):
     id=request.query_params.get('id')
@@ -335,6 +404,7 @@ def delete_favourite_api(request):
     fav.delete()
     return Response('Job removed from favourite')
 
+# delete job experience api
 @api_view(['DELETE'])
 def delete_job_experience_api(request):
     id=request.query_params.get('id')
@@ -343,6 +413,7 @@ def delete_job_experience_api(request):
     experience.save()
     return Response('Job Experience Deleted Successfully')
 
+# delete job project api
 @api_view(['DELETE'])
 def delete_job_project_api(request):
     id=request.query_params.get('id')
@@ -350,6 +421,16 @@ def delete_job_project_api(request):
     project.is_deleted=True
     project.save()
     return Response('Job Project Deleted Successfully')
+
+
+# delete blog api
+@api_view(['DELETE'])
+def delete_blog_api(request):
+    id=request.query_params.get('id')
+    blog=Blog.objects.get(id=id)
+    blog.is_deleted= True
+    blog.save()
+    return Response('Blog deleted')
 
 ############################### UPDATE API ###############################
 
@@ -433,6 +514,21 @@ def update_job_profile_api(request):
         return Response({"success": False, 'response': {'message': serializer.errors}},
 			status=status.HTTP_400_BAD_REQUEST)
 
+# update job profile api
+@api_view(['PUT'])
+def update_blog_api(request):
+    id=request.query_params.get('id')
+    try:
+        profile=Blog.objects.get(id=id)
+    except Blog.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+    if request.method=='PUT':
+        serializer=BlogSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()    
+            return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+        return Response({"success": False, 'response': {'message': serializer.errors}},
+			status=status.HTTP_400_BAD_REQUEST)
 
 ##############################  FILTERING IN API  ########################
 
@@ -515,6 +611,19 @@ def search_job_api(request):
 
     serializer=GetJobSerializer(job, many=True)
     return Response(serializer.data)
+@api_view(['GET'])
+def search_blog_api(request):
+    category=request.query_params.get('category')
+    title=request.query_params.get('title')
+    if not category:
+        category=''
+    if not title:
+        title=''
+    blogs=Blog.objects.filter(Q(title__icontains=title)& 
+                  Q(category__name__icontains=category), is_deleted=False)
+    serializer=GetBlogSerializer(blogs, many=True)
+    return Response(serializer.data)
+
 ################################ VIEWS  ####################################
 
 def company(request):
