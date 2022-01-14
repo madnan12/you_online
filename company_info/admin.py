@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.admin.helpers import AdminField
-from .models import AdminBlog, AdminJob, Blog, Blog_Category, Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Post,State,City, Language, Industry, Skill,FavouriteJob
+from .models import AdminBlog, AdminJob, Blog, Blog_Category, Company, Job, Education, Currency,Country, Job_Category, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Notification, Post,State,City, Language, Industry, Skill,FavouriteJob,Apply
 # Register your models here.
 
 @admin.register(Post)
@@ -47,6 +47,10 @@ class IndustryAdmin(admin.ModelAdmin):
 class SkillAdmin(admin.ModelAdmin):
     list_display=['name']
 
+@admin.register(Apply)
+class ApplyAdmin(admin.ModelAdmin):
+    list_display=['user','job','documents','experience','expected']
+
 @admin.register(FavouriteJob)
 class FavouriteAdmin(admin.ModelAdmin):
     list_display=['job','user','created_at']
@@ -86,3 +90,7 @@ class AdminJobAdmin(admin.ModelAdmin):
 @admin.register(AdminBlog)
 class AdminBlogAdmin(admin.ModelAdmin):
     list_display=['blog','user','created_at']
+
+@admin.register(Notification)
+class NotificationAdmin(admin.ModelAdmin):
+    list_display=['user', 'apply']

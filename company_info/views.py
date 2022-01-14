@@ -1,14 +1,20 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 import datetime
+from rest_framework.pagination import PageNumberPagination
 from django.shortcuts import redirect, render
 from rest_framework import status
+from django.conf import settings
+from django.contrib.auth.models import User
 from rest_framework.response import Response
 from .serializers import AdminJobSerializer, ApplySerializer, BlogSerializer, CompanySerializer, FavouriteSerializer, GetApplySerializer, GetBlogSerializer, GetFavouriteSerializer, GetJob_EndoresementsSerializer, GetJob_ProfileSerializer, GetJobExperienceSerializer, GetJobProjectSerializer, GetJobSerializer, IndustrySerializer, Job_EndoresementsSerializer, Job_ProfileSerializer, JobExperienceSerializer, JobProjectSerializer, JobSerializer, EducationSerializer, CountrySerializer, SkillSerializer, StateSerializer, CitySerializer, CurrencySerializer, LanguageSerializer, PostSerializer,UpdateCompanySerializer, UpdateJobSerializer, AdminBlogSerializer
-from .models import AdminBlog, AdminJob, Blog, City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Language, Post, Skill, State, Blog_Category
+from .models import AdminBlog, AdminJob, Blog, City, Company, Country, Currency, Education, Apply, FavouriteJob,Industry, Job, Job_Endoresements, Job_Experience, Job_Profile, Job_Project, Language, Notification, Post, Skill, State, Blog_Category
 from django.db.models import Q
 from .forms import Company_InfoForm, Job_InfoForm, Company_InfoUpdateForm, Job_InfoUpdateForm, ApplyForm
-from company_info import serializers
-
+from django.contrib.auth import authenticate
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.authentication import JWTAuthentication
 ###############################  FETCHING API ########################################
 
 # get all latest job within 24 hours
@@ -69,10 +75,14 @@ def get_job_endoresements_api(request):
 
 @api_view(['GET'])
 def get_blog_api(request):
+    paginator = PageNumberPagination()
+    paginator.page_size = 5
     date_from = datetime.datetime.now() - datetime.timedelta(days=1)
     blogs=Blog.objects.filter(created_at__gte=date_from ,is_deleted=False).order_by('-created_at')
-    serializer=GetBlogSerializer(blogs, many=True)
-    return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
+    result_page = paginator.paginate_queryset(blogs, request)
+    serializer=GetBlogSerializer(result_page, many=True)
+    return paginator.get_paginated_response(serializer.data)
+    # return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK) 
 
 @api_view(['GET'])
 def get_apply_api(request):
@@ -188,13 +198,15 @@ def add_skill(request):
 @api_view(['POST'])
 def add_apply_api(request):
     user=request.user
-    request.data['user'] = user.id
-    serializer=ApplySerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
-    return Response({"success": False, 'response': {'message': serializer.errors}},
-			status=status.HTTP_400_BAD_REQUEST)
+    job_id=request.data['job']
+    job=Job.objects.get(id=job_id)
+    documents=request.data['documents']
+    experience=request.data['experience']
+    expected=request.data['expected']
+    apply=Apply.objects.create(user=user, job=job,documents=documents,experience=experience,expected=expected)
+    notification=Notification.objects.create(user=user, apply=apply)
+    return Response('apply and notification created')
+
 
 # add favourite job api
 @api_view(['POST',])
@@ -270,7 +282,6 @@ def add_blog_api(request):
     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
 
 
-
 # add admin jobs job api
 @api_view(['POST',])
 def add_admin_jobs_api(request):
@@ -302,6 +313,16 @@ def add_admin_blogs_api(request):
         adminblog=AdminBlog.objects.create(user=request.user, blog=blog)
         serializer=AdminBlogSerializer(adminblog)
         return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+
+
+# @api_view(['POST'])
+# def add_notifications_api(request):
+#     id=request.query_params.get('id')
+#     apply=Apply.objects.get(id=id)
+#     notification=apply.apply_set.all()
+#     serializer=(notification)
+#     return Response({"success": True, 'response': {'message': serializer.data}},status=status.HTTP_200_OK)
+    
 
 ########################## DELETE API  ###############################
 
@@ -754,3 +775,21 @@ def search_company(request):
     }
     return render(request, 'search_company.html',context)
     
+
+@api_view(["POST"])
+@permission_classes((AllowAny,))
+def login_api(request):
+    username = request.data.get("username")
+    password = request.data.get("password")
+    if username is None or password is None:
+        return Response({'error': 'Please provide both username and password'},status=status.HTTP_400_BAD_REQUEST)
+    user = authenticate(username=username, password=password)
+    if not user:
+        return Response({'error': 'Invalid Credentials'},status=status.HTTP_404_NOT_FOUND)
+    token, _ = Token.objects.get_or_create(user=user)
+    return Response({'token': token.key},status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+def logout_api(request):
+    request.user.auth_token.delete()
+    return Response(status=status.HTTP_200_OK)

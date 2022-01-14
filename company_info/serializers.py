@@ -3,7 +3,8 @@ from django.contrib.postgres import fields
 from django.db import models
 from django.http import request
 from rest_framework import serializers
-from .models import AdminBlog, AdminJob, Apply, Blog, Company, FavouriteJob, Job, Education, Currency,Country, Job_Profile, Post,State,City, Language, Industry, Skill,Job_Experience,Job_Project, Job_Endoresements
+from rest_framework.views import set_rollback
+from .models import AdminBlog, AdminJob, Apply, Blog, Company, FavouriteJob, Job, Education, Currency,Country, Job_Profile, Notification, Post,State,City, Language, Industry, Skill,Job_Experience,Job_Project, Job_Endoresements
 from django.contrib.auth.models import User
 from django.conf import settings
 
@@ -137,6 +138,11 @@ class AdminBlogSerializer(serializers.ModelSerializer):
         model=AdminBlog
         fields=['blog','user']
 
+
+class NotificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model=Notification
+        fields='__all__'
 
 #########################  UPDATE SERIALIZERS   ##################################
 

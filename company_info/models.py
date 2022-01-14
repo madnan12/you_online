@@ -4,7 +4,17 @@ from django.contrib.auth.models import User
 from PIL import Image
 from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
-# Create your models here.
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.http import request
+from rest_framework.authtoken.models import Token
+from django.conf import settings
+
+
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def create_auth_token(sender, instance=None, created=False, **kwargs):
+#     if created:
+#         Token.objects.create(user=instance)
     
 # company model
 class Company(models.Model):
@@ -208,7 +218,16 @@ class Apply(models.Model):
         db_table='Apply'
 
     def __str__(self):
-        return str(self.experience)+" "+str(self.expected) 
+        return str(self.expected) 
+
+class Notification(models.Model):
+    user=models.ForeignKey(User, on_delete=models.CASCADE)
+    apply=models.ForeignKey(Apply, on_delete=models.CASCADE)
+    class Meta:
+        db_table='Notification'
+    
+    def __str__(self):
+        return  str(self.apply)
 
 # favourite job model
 class FavouriteJob(models.Model):

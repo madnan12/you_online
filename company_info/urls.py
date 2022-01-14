@@ -1,5 +1,9 @@
 from django.urls import path
 from company_info import views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     ########### FETCING API URL #################
@@ -13,7 +17,10 @@ urlpatterns = [
     path('get_blog_api', views.get_blog_api),
     path('get_apply_api', views.get_apply_api),
     path('search_blog_api', views.search_blog_api),
-
+    path('login_api/', views.login_api),
+    path('logout_api', views.logout_api),
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     ########### CREATE API URL####################
     path('add_company',views.add_company ),
     path('add_job',views.add_job ),
@@ -71,4 +78,5 @@ urlpatterns = [
     path('delete_comapny/<int:id>', views.delete_company, name="delete_company"),
     path('apply/<int:id>', views.apply, name="apply"),
     path('all_applied/<int:id>', views.apply_data, name="all_applied"),
+    ####################### Toke ##############################
 ]
